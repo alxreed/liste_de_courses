@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:liste_de_courses/model/item.dart';
 import 'package:liste_de_courses/widgets/donnees_vides.dart';
 import 'package:liste_de_courses/model/databaseClient.dart';
+import 'package:liste_de_courses/widgets/itemDetail.dart';
+import 'package:liste_de_courses/widgets/itemDetail.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -57,6 +59,11 @@ class _MyHomePageState extends State<MyHomePage> {
                     icon: new Icon(Icons.edit),
                     onPressed: (() => ajouter(item)),
                   ),
+                  onTap: () {
+                    Navigator.push(context, new MaterialPageRoute(builder: (BuildContext buildcontext) {
+                      return new ItemDetail(item);
+                    }));
+                  },
                 );
               },
             ),
