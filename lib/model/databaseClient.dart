@@ -3,6 +3,7 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:liste_de_courses/model/item.dart';
+import 'article.dart';
 
 class DatabaseClient {
   Database _database;
@@ -31,6 +32,14 @@ class DatabaseClient {
         id INTEGER PRIMARY KEY,
         nom TEXT NOT NULL)
     ''');
+    await db.execute('''CREATE TABLE article (
+      id INTEGER PRIMARY KEY,
+      nom TEXT NOT NULL,
+      item INTEGER,
+      prix TEXT,
+      magasin TEXT
+      )
+      ''');
   }
 
   //ECRITURE DES DONNEES
@@ -52,9 +61,19 @@ class DatabaseClient {
     if (item.id == null) {
       item.id = await maDatabase.insert('item', item.toMap());
     } else {
-      await maDatabase.update('item', item.toMap(), where: 'id = ?', whereArgs: [item.id]);
+      await maDatabase
+          .update('item', item.toMap(), where: 'id = ?', whereArgs: [item.id]);
     }
     return item;
+  }
+
+  Future<Article> upsertArticle(Article article) async {
+    Database maDatabase = await database;
+    (article.id == null)
+        ? article.id = await maDatabase.insert('article', article.toMap())
+        : await maDatabase.update('article', article.toMap(),
+            where: 'id = ?', whereArgs: [article.id]);
+    return article;
   }
 
   Future<int> delete(int id, String table) async {
