@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:liste_de_courses/model/item.dart';
 import 'package:liste_de_courses/model/article.dart';
 import 'donnees_vides.dart';
 import 'ajout_article.dart';
+import 'package:liste_de_courses/model/databaseClient.dart';
+
 class ItemDetail extends StatefulWidget {
   Item item;
 
@@ -16,6 +20,18 @@ class ItemDetail extends StatefulWidget {
 
 class _ItemDetailState extends State<ItemDetail> {
   List<Article> articles;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    DatabaseClient().allArticles(widget.item.id).then((liste) {
+      setState(() {
+        articles = liste;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -24,11 +40,16 @@ class _ItemDetailState extends State<ItemDetail> {
         actions: <Widget>[
           new FlatButton(
             onPressed: () {
-              Navigator.push(context, new MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return new Ajout(widget.item.id);
-                }
-              ));
+              Navigator.push(context,
+                  new MaterialPageRoute(builder: (BuildContext context) {
+                return new Ajout(widget.item.id);
+              })).then((value) {
+                DatabaseClient().allArticles(widget.item.id).then((liste) {
+                  setState(() {
+                    articles = liste;
+                  });
+                });
+              });
             },
             child:
                 new Text('ajouter', style: new TextStyle(color: Colors.white)),
@@ -40,12 +61,27 @@ class _ItemDetailState extends State<ItemDetail> {
           : new GridView.builder(
               itemCount: articles.length,
               gridDelegate:
-                  SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+                  SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 1),
               itemBuilder: (context, i) {
                 Article article = articles[i];
                 return new Card(
                   child: new Column(
-                    children: <Widget>[new Text(article.nom)],
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      new Text(article.nom, textScaleFactor: 1.4,),
+                      new Container(
+                        height: MediaQuery.of(context).size.height / 2.5,
+                        child: (article.image == null)
+                            ? new Image.asset('images/no_image.jpg')
+                            : new Image.file(new File(article.image)),
+                      ),
+                      new Text((article.prix == null)
+                          ? 'Aucun prix renseigné'
+                          : 'Prix: ${article.prix}'),
+                      new Text((article.magasin == null)
+                          ? 'Aucun magasin renseigné'
+                          : 'Magasin ${article.magasin}')
+                    ],
                   ),
                 );
               },

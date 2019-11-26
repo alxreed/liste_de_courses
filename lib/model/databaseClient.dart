@@ -78,6 +78,7 @@ class DatabaseClient {
 
   Future<int> delete(int id, String table) async {
     Database maDatabase = await database;
+    await maDatabase.delete('article', where: 'item = ?', whereArgs: [id]);
     return await maDatabase.delete(table, where: 'id = ?', whereArgs: [id]);
   }
 
@@ -94,5 +95,18 @@ class DatabaseClient {
       items.add(item);
     });
     return items;
+  }
+
+  Future<List<Article>> allArticles(int item) async {
+    Database maDatabase = await database;
+    List<Map<String, dynamic>> resultat =
+        await maDatabase.query('article', where: 'item = ?', whereArgs: [item]);
+    List<Article> articles = [];
+    resultat.forEach((map) {
+      Article article = new Article();
+      article.fromMap(map);
+      articles.add(article);
+    });
+    return articles;
   }
 }
